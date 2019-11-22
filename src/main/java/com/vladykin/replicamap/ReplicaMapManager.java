@@ -3,7 +3,6 @@ package com.vladykin.replicamap;
 import com.vladykin.replicamap.holder.MapsHolder;
 import com.vladykin.replicamap.kafka.impl.util.Utils;
 import com.vladykin.replicamap.tx.TxFunction;
-import com.vladykin.replicamap.tx.TxResult;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -79,25 +78,9 @@ public interface ReplicaMapManager extends AutoCloseable {
     AutoCloseable readTx();
 
     /**
-     * Executes the transaction asynchronously.
-     *
-     * @param tx Transaction body.
-     * @return Future.
-     */
-    CompletableFuture<TxResult> asyncTx(TxFunction tx);
-
-    /**
      * Executes transaction synchronously.
      *
      * @param tx Transaction body.
-     * @return Transaction result.
      */
-    default TxResult tx(TxFunction tx) {
-        try {
-            return asyncTx(tx).get();
-        }
-        catch (InterruptedException | ExecutionException e) {
-            throw new ReplicaMapException(e);
-        }
-    }
+    void tx(TxFunction tx);
 }

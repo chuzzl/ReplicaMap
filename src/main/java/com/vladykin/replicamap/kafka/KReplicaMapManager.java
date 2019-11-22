@@ -20,7 +20,6 @@ import com.vladykin.replicamap.kafka.impl.worker.FlushWorker;
 import com.vladykin.replicamap.kafka.impl.worker.OpsWorker;
 import com.vladykin.replicamap.kafka.impl.worker.Worker;
 import com.vladykin.replicamap.tx.TxFunction;
-import com.vladykin.replicamap.tx.TxResult;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -226,8 +225,8 @@ public class KReplicaMapManager implements ReplicaMapManager {
     }
 
     @Override
-    public CompletableFuture<TxResult> asyncTx(TxFunction tx) {
-        return null;
+    public void tx(TxFunction tx) {
+
     }
 
     protected int getPartitions() {
