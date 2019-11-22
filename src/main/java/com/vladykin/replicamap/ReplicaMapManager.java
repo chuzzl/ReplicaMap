@@ -2,8 +2,12 @@ package com.vladykin.replicamap;
 
 import com.vladykin.replicamap.holder.MapsHolder;
 import com.vladykin.replicamap.kafka.impl.util.Utils;
+import com.vladykin.replicamap.tx.TxFunction;
+import com.vladykin.replicamap.tx.TxResult;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 /**
  * The component that manages replicated maps lifecycle.
@@ -31,7 +35,7 @@ public interface ReplicaMapManager extends AutoCloseable {
         try {
             start().get(timeout, unit);
         }
-        catch (Exception e) {
+        catch (InterruptedException | ExecutionException | TimeoutException e) {
             throw new ReplicaMapException("Failed to start replica map manager.", e);
         }
     }
@@ -66,4 +70,34 @@ public interface ReplicaMapManager extends AutoCloseable {
      * @see MapsHolder#getDefaultMapId()
      */
     <K,V> ReplicaMap<K,V> getMap();
+
+    /**
+     * Forbids all the updates for the underlying map to have a consistent data view.
+     *
+     * @return Closeable object to be used in try-with-resources.
+     */
+    AutoCloseable readTx();
+
+    /**
+     * Executes the transaction asynchronously.
+     *
+     * @param tx Transaction body.
+     * @return Future.
+     */
+    CompletableFuture<TxResult> asyncTx(TxFunction tx);
+
+    /**
+     * Executes transaction synchronously.
+     *
+     * @param tx Transaction body.
+     * @return Transaction result.
+     */
+    default TxResult tx(TxFunction tx) {
+        try {
+            return asyncTx(tx).get();
+        }
+        catch (InterruptedException | ExecutionException e) {
+            throw new ReplicaMapException(e);
+        }
+    }
 }

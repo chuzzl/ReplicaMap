@@ -19,6 +19,8 @@ import com.vladykin.replicamap.kafka.impl.util.Utils;
 import com.vladykin.replicamap.kafka.impl.worker.FlushWorker;
 import com.vladykin.replicamap.kafka.impl.worker.OpsWorker;
 import com.vladykin.replicamap.kafka.impl.worker.Worker;
+import com.vladykin.replicamap.tx.TxFunction;
+import com.vladykin.replicamap.tx.TxResult;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.List;
@@ -216,6 +218,16 @@ public class KReplicaMapManager implements ReplicaMapManager {
             throw new ReplicaMapException("Failed to create ReplicaMap manager for topics [" +
                 dataTopic + ", " + opsTopic + ", " + flushTopic + "].", e);
         }
+    }
+
+    @Override
+    public AutoCloseable readTx() {
+        return null;
+    }
+
+    @Override
+    public CompletableFuture<TxResult> asyncTx(TxFunction tx) {
+        return null;
     }
 
     protected int getPartitions() {
