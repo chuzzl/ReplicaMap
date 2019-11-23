@@ -696,10 +696,14 @@ public class KReplicaMapManager implements ReplicaMapManager {
         opsProducer.send(newOpRecord(map, opId, updateType, key, exp, upd, function), onSendFailed);
     }
 
+    protected Object getMapId(Object key) {
+        return maps.getMapId(key);
+    }
+
     protected <K,V> boolean applyReceivedUpdate(long clientId, long opId, byte updateType, K key, V exp, V upd,
         BiFunction<?,?,?> function, Box<V> updatedValueBox
     ) {
-        Object mapId = maps.getMapId(key);
+        Object mapId = getMapId(key);
 
         if (log.isTraceEnabled()) {
             log.trace("Receiving operation [{}] for map [{}] from topic [{}], for key [{}]: {} -> {}",

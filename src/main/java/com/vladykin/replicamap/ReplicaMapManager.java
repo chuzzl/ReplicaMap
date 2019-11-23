@@ -82,5 +82,5 @@ public interface ReplicaMapManager extends AutoCloseable {
      *
      * @param tx Transaction body.
      */
-    void tx(TxFunction tx);
+    <R> R tx(TxFunction<R> tx);
 }

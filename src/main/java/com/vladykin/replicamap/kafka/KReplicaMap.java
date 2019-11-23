@@ -5,6 +5,7 @@ import com.vladykin.replicamap.base.FailureCallback;
 import com.vladykin.replicamap.base.ReplicaMapBase;
 import com.vladykin.replicamap.kafka.impl.util.Utils;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiFunction;
@@ -43,6 +44,12 @@ public class KReplicaMap<K,V> extends ReplicaMapBase<K,V> {
     @Override
     protected void beforeStart(AsyncOp<?,K,V> op) {
         manager.checkRunning();
+
+        K key = op.getKey();
+        Object mapId = manager.getMapId(key);
+
+        if (!Objects.equals(mapId, id))
+            throw new IllegalArgumentException("Key " + key + " contains wrong map id for the map " + id);
     }
 
     @Override
