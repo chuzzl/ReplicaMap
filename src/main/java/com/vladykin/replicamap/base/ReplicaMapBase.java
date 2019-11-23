@@ -355,7 +355,7 @@ public abstract class ReplicaMapBase<K, V> implements ReplicaMap<K, V> {
 
     protected void doSendUpdate(AsyncOp<?,K,V> op) {
         try {
-            sendUpdate(op.opKey.opId, op.updateType, op.opKey.key, op.exp, op.upd, op.function, op);
+            sendUpdate(op.getOpId(), op.updateType, op.getKey(), op.exp, op.upd, op.function, op);
         }
         catch (Exception e) {
             op.onError(e);
@@ -489,6 +489,22 @@ public abstract class ReplicaMapBase<K, V> implements ReplicaMap<K, V> {
             opKey = new OpKey<>(key, map.nextOpId());
         }
 
+        public K getKey() {
+            return opKey.key;
+        }
+
+        public long getOpId() {
+            return opKey.opId;
+        }
+
+        public V getOldValue() {
+            return map.map.get(getKey());
+        }
+
+        public boolean containsKey() {
+            return map.map.containsKey(getKey());
+        }
+
         protected boolean casState(OpState exp, OpState upd) {
             return STATE.compareAndSet(this, exp, upd);
         }
@@ -557,7 +573,7 @@ public abstract class ReplicaMapBase<K, V> implements ReplicaMap<K, V> {
             if (error == null)
                 complete(result);
             else if (!isDone())
-                completeExceptionally(map.wrapOpError(this, error, opKey.key));
+                completeExceptionally(map.wrapOpError(this, error, getKey()));
         }
     }
 
@@ -572,7 +588,7 @@ public abstract class ReplicaMapBase<K, V> implements ReplicaMap<K, V> {
 
         @Override
         protected boolean checkPrecondition(boolean releaseOnFail) {
-            V v = map.map.get(opKey.key);
+            V v = getOldValue();
 
             if (!upd.equals(v))
                 return true;
@@ -589,7 +605,7 @@ public abstract class ReplicaMapBase<K, V> implements ReplicaMap<K, V> {
 
         @Override
         protected boolean checkPrecondition(boolean releaseOnFail) {
-            V v = map.map.get(opKey.key);
+            V v = getOldValue();
 
             if (v == null)
                 return true;
@@ -609,7 +625,7 @@ public abstract class ReplicaMapBase<K, V> implements ReplicaMap<K, V> {
 
         @Override
         protected boolean checkPrecondition(boolean releaseOnFail) {
-            if (exp.equals(map.map.get(opKey.key)))
+            if (exp.equals(getOldValue()))
                 return true;
 
             finish(Boolean.FALSE, null, releaseOnFail);
@@ -624,7 +640,7 @@ public abstract class ReplicaMapBase<K, V> implements ReplicaMap<K, V> {
 
         @Override
         protected boolean checkPrecondition(boolean releaseOnFail) {
-            if (map.map.containsKey(opKey.key))
+            if (containsKey())
                 return true;
 
             finish(null, null, releaseOnFail);
@@ -639,7 +655,7 @@ public abstract class ReplicaMapBase<K, V> implements ReplicaMap<K, V> {
 
         @Override
         protected boolean checkPrecondition(boolean releaseOnFail) {
-            if (map.map.containsKey(opKey.key))
+            if (containsKey())
                 return true;
 
             finish(null, null, releaseOnFail);
@@ -654,7 +670,7 @@ public abstract class ReplicaMapBase<K, V> implements ReplicaMap<K, V> {
 
         @Override
         protected boolean checkPrecondition(boolean releaseOnFail) {
-            if (exp.equals(map.map.get(opKey.key)))
+            if (exp.equals(getOldValue()))
                 return true;
 
             finish(Boolean.FALSE, null, releaseOnFail);
@@ -690,7 +706,7 @@ public abstract class ReplicaMapBase<K, V> implements ReplicaMap<K, V> {
 
         @Override
         protected boolean checkPrecondition(boolean releaseOnFail) {
-            if (map.map.containsKey(opKey.key))
+            if (containsKey())
                 return true;
 
             finish(null, null, releaseOnFail);
