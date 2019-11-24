@@ -10,6 +10,7 @@ import com.vladykin.replicamap.kafka.compute.ComputeSerializer;
 import com.vladykin.replicamap.kafka.impl.msg.OpMessage;
 import com.vladykin.replicamap.kafka.impl.msg.OpMessageDeserializer;
 import com.vladykin.replicamap.kafka.impl.msg.OpMessageSerializer;
+import com.vladykin.replicamap.kafka.impl.tx.TxMapsManager;
 import com.vladykin.replicamap.kafka.impl.util.Box;
 import com.vladykin.replicamap.kafka.impl.util.FlushQueue;
 import com.vladykin.replicamap.kafka.impl.util.KeyBytesPartitioner;
@@ -225,8 +226,8 @@ public class KReplicaMapManager implements ReplicaMapManager {
     }
 
     @Override
-    public void tx(TxFunction tx) {
-
+    public <R> R tx(TxFunction<R> tx) {
+        return tx.apply(new TxMapsManager(this, tx), null);
     }
 
     protected int getPartitions() {

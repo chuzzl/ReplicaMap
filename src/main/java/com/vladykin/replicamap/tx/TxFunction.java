@@ -15,7 +15,8 @@ public interface TxFunction<R> extends BiFunction<TxMaps, TxMeta, R> {
      * @param txMaps Transactional maps.
      * @param txMeta Metadata for current transaction.
      * @return Result of the transaction logic.
+     * @throws TxRetryException If data inconsistencies were detected and the transaction needs to be retried.
      */
     @Override
-    R apply(TxMaps txMaps, TxMeta txMeta);
+    R apply(TxMaps txMaps, TxMeta txMeta) throws TxRetryException;
 }
